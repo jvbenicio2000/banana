@@ -11,8 +11,11 @@ versao-2a-por-motor/
 ├── alvo.md                   # objetivo (2 A)
 ├── prompt-placa-motores.md   # prompt de engenharia (2 A)
 ├── flux-roteiro.md           # roteiro Flux Copilot (2 A)
-├── bom-jlcpcb.md             # BOM detalhada (2 A)
+├── bom-jlcpcb.md             # BOM detalhada (2 A, ponte H discreta IRF3205+IR2104)
 ├── bom-jlcpcb.csv            # BOM formato JLCPCB (2 A)
+├── bom-jlcpcb-max-basic.md   # BOM "máximo Basic" (ponte H complementar SOT-23)
+├── bom-jlcpcb-max-basic.csv  # BOM máximo-Basic formato JLCPCB
+├── design-max-basic.md       # nota de projeto do drive complementar
 └── dimensionamento/
     ├── 1-calor-mosfet.md
     ├── 2-largura-trilha.md
