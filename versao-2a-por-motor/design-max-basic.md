@@ -52,10 +52,43 @@ Sem o IRF4905 (Extended), usamos **4× AO3401A em paralelo** no positivo de 12 V
 (gate por divisor 10 k/10 k → Vgs ≈ −6 V). Em ~12 A do sistema, a perda total é
 ~2,4 W repartida nos 4 SOT-23 → **pour de cobre generoso** sob eles.
 
+## Sensor de corrente (por canal)
+
+Cada canal tem um **shunt de 10 mΩ** no low-side + um **INA180A1** (ganho 20×)
+cujo sinal vai a um **ADC do ESP32**. A 6 A de pico: 6 A × 10 mΩ × 20 = **1,2 V**;
+a 2 A: 0,4 V. O firmware corta o PWM em sobrecorrente (proteção fina), além do
+**fusível ~15 A** (proteção grossa contra curto). São 6 canais → **6 INA180 +
+6 shunts** (ADC1: GPIO 32/33/34/35/36/39).
+
+## Câmera (sensor tipo câmera)
+
+Módulo **SPI ArduCAM OV2640** **externo**, plugado num **header 1×8** na placa.
+O ArduCAM tem **FIFO/JPEG próprio**, então funciona com o **WROOM-32E sem PSRAM**.
+Usa **SPI** (SCK/MOSI/MISO/CS) + **I²C/SCCB** (SDA/SCL) — ~6 pinos.
+
+> Por que não câmera DVP (OV2640 paralela tipo ESP32-CAM): exige **PSRAM** (o
+> WROOM-32E não tem) e ~13 pinos. Ficaria para o módulo **WROVER-E**.
+
+## Orçamento de pinos do ESP32-WROOM-32E (como tudo cabe)
+
+Com 6 motores + corrente + câmera, os pinos não cabem direto. Solução: **expansor
+I²C PCA9555** assume os **sinais de direção** dos motores.
+
+| Função | Pinos do ESP32 | Como |
+|---|---|---|
+| PWM de velocidade (6 motores) | 6 (saída) | LEDC do ESP32 |
+| Direção dos motores | 0 | via **PCA9555** (I²C) |
+| Câmera SPI | 4 | SCK/MOSI/MISO/CS |
+| I²C (PCA9555 + câmera SCCB) | 2 | SDA/SCL compartilhado |
+| Sense de corrente | 6 (ADC1) | GPIO 32/33/34/35/36/39 (entrada) |
+| UART (programação) | 2 | GPIO1/3 (CH340C) |
+
+> Validar no Flux: evitar strapping/boot (0/2/12/15); ADC2 não funciona com
+> Wi-Fi ligado, por isso o sense usa **ADC1**.
+
 ## Limitações aceitas
 
-- **Sem sensor de corrente** (INA180 é Extended) → proteção fica no **fusível
-  ~15 A** na placa. Dá para reativar o sensoriamento depois (aí volta 1 Extended).
 - Peças SOT-23 são para **2 A/6 A por motor** — **não** suportam o paralelismo de
   4 A/12 A; por isso esta variante é **6 canais independentes**.
 - P-MOS high-side tem Rds maior que N-MOS → leve perda extra (ok em 2 A).
+- A câmera é **módulo externo** (header), não montada no PCBA.

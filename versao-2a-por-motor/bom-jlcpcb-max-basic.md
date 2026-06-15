@@ -14,9 +14,19 @@ topologia:
   que exigiam MOSFETs de potência Extended.)
 
 > ⚖️ **Trade-offs assumidos:** peças mais "leves" (SOT-23), maior contagem de
-> componentes, P-MOS high-side um pouco menos eficiente, e **sem sensor de
-> corrente** (INA180 é Extended → removido; a proteção fica por conta do
-> **fusível na placa ~15 A**). Veja `design-max-basic.md` para o esquema de drive.
+> componentes e P-MOS high-side um pouco menos eficiente. Veja `design-max-basic.md`
+> para o esquema de drive, o sensoriamento de corrente e a câmera.
+
+## ➕ Add-ons (a seu pedido): sensor de corrente + câmera
+
+- **Sensor de corrente por canal:** 6× INA180 + 6× shunt 10 mΩ → ADC do ESP32
+  (overcurrent por firmware, além do fusível). São peças **Extended**.
+- **Câmera (sensor tipo câmera):** módulo **SPI ArduCAM OV2640** (externo, com
+  FIFO/JPEG próprio — funciona sem PSRAM no WROOM-32E) plugado num **header 1×8**
+  na placa (SPI + I²C/SCCB). O módulo em si é comprado à parte.
+- **Expansor I²C PCA9555:** necessário para caber tudo nos pinos do ESP32 — leva
+  os **sinais de direção dos motores** para o I²C, liberando GPIOs para a câmera.
+  Ver `design-max-basic.md` (orçamento de pinos).
 
 - **Consulta:** 2026-06-15. **B** = Basic, **P** = Preferred (ambos sem taxa).
 - Quantidades de passivos são **aproximadas** (fecham no esquemático do Flux).
@@ -57,6 +67,10 @@ topologia:
 | Borne entrada 5,08 mm | WJ2EDGRC-5.08-2P | **C3697** | 1 | Sem opção Basic/Preferred |
 | Suporte de fusível 5×20 | XC-7 | **C3131** | 1 | Sem opção Basic/Preferred |
 | Bulk eletrolítico 470µF/25V² | CD2884771EM | **C2960233** | 10 | Eletrolíticos não têm Basic; valor **unificado** p/ usar só 1 feeder |
+| Sense de corrente (1 por canal) | INA180A1IDBVR | **C122228** | 6 | Sem amplificador de corrente Basic |
+| Shunt 10 mΩ 3W (1 por canal) | HoYLR2512-3W-10mR | **C5375464** | 6 | Sem shunt Basic |
+| Expansor I²C (direção dos motores) | PCA9555PW | **C42420607** | 1 | Libera pinos do ESP32 p/ a câmera |
+| Header 1×8 (câmera SPI ArduCAM) | 2.54-1×8P fêmea | **C27438** | 1 | Conector p/ módulo de câmera externo |
 
 ² Unifiquei o bulk em **um único valor (470 µF/25V)** — 4 na entrada + 6 nos
 canais — para gastar **apenas uma** taxa de feeder de eletrolítico. (Trocar por
@@ -71,16 +85,19 @@ peças.)
 |---|---|---|
 | Jacks banana 4 mm | 12 | Soldar à mão; não há no PCBA |
 | Fusível 5×20 ~15 A slow-blow | 1 | Inserido no suporte `C3131` |
+| Módulo de câmera SPI ArduCAM (OV2640) | 1 | Plugado no header 1×8; comprado à parte |
 
 ---
 
 ## 💰 Resultado em taxas de feeder
 
-- **Antes (BOM 2 A discreta):** ~10 tipos Extended com taxa.
-- **Agora (máximo-Basic):** **apenas 6 tipos Extended** — e 5 deles são
-  interface/mecânica (ESP32, CH340C, USB-C, borne, suporte de fusível) + 1
-  eletrolítico unificado. **Todo o estágio de potência ficou Basic.**
-- Economia estimada de **~$24–30** em taxas de carregamento (uma vez por pedido).
+- **Estágio de potência:** 100% Basic (sem taxa). ✅
+- **Tipos Extended (com taxa de feeder):** **10** — sendo 6 da base
+  (ESP32, CH340C, USB-C, borne, suporte de fusível, eletrolítico) + 4 dos
+  add-ons que você pediu (INA180, shunt, PCA9555, header da câmera).
+- Mesmo assim, **bem menos** que a BOM discreta original (que tinha o estágio de
+  potência todo Extended). Os 4 Extended dos add-ons são o custo das features
+  (sensor de corrente + câmera).
 
 ---
 
