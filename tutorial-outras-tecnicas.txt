@@ -1,0 +1,109 @@
+================================================================================
+  OUTRAS TÉCNICAS DE "DESTRAVAR" / ALTERAR O ALINHAMENTO DE MODELOS DE IA
+  (Complemento do tutorial sobre abliteration)
+================================================================================
+
+Documento educativo. A abliteration é apenas UMA das técnicas. Aqui está o
+panorama das demais, divididas por ONDE elas mexem: nos PESOS (permanente), na
+EXECUÇÃO (temporário) ou só no PROMPT (sem alterar o modelo).
+
+--------------------------------------------------------------------------------
+GRUPO 1 - ALTERAM OS PESOS (permanente)
+--------------------------------------------------------------------------------
+  TÉCNICA                     COMO FUNCIONA
+  -------------------------   ----------------------------------------------------
+  Abliteration /              Acha o "eixo da recusa" e o apaga por projeção
+  directional ablation        ortogonal. Barata, NÃO treina. (ver tutorial
+                              principal)
+
+  Fine-tune completo          Re-treina o modelo com exemplos sem recusas
+                              (ex.: família "Dolphin"). Mais caro, resultado
+                              mais "natural".
+
+  LoRA / QLoRA                Treina só um pequeno COMPLEMENTO (poucos MB)
+                              acoplado ao modelo, em vez de mexer em tudo.
+                              Barato e popular.
+
+  DPO                         Treina o modelo a PREFERIR respostas que ajudam
+  (Direct Preference          em vez de recusar, mostrando pares
+   Optimization)              "boa resposta x recusa".
+
+  Model merging (fusão)       MISTURA os pesos de um modelo alinhado com um
+                              destravado (métodos SLERP, TIES, DARE) -> herda
+                              características dos dois.
+
+
+--------------------------------------------------------------------------------
+GRUPO 2 - ALTERAM A EXECUÇÃO (temporário, sem regravar o modelo)
+--------------------------------------------------------------------------------
+  TÉCNICA                     COMO FUNCIONA
+  -------------------------   ----------------------------------------------------
+  Activation steering /       É a versão "ao vivo" da abliteration: durante o
+  control vectors             uso, soma-se/subtrai-se um vetor nas ativações
+                              para empurrar o comportamento (mais ou menos
+                              recusa). Não grava nada nos pesos.
+
+  Representation              Generalização disso: criam-se "vetores de
+  engineering                 controle" para vários traços (tom, estilo,
+                              cautela), não só recusa.
+
+  Manipulação de              Na hora de gerar, proíbe/penaliza os tokens de
+  logits / tokens             recusa (ex.: "Desculpe", "não posso") ou força
+                              um começo ("Claro, aqui está...").
+
+
+--------------------------------------------------------------------------------
+GRUPO 3 - NÃO ALTERAM O MODELO (só enganam)
+--------------------------------------------------------------------------------
+  TÉCNICA                     COMO FUNCIONA
+  -------------------------   ----------------------------------------------------
+  Jailbreak por prompt        System prompts, roleplay, instruções elaboradas
+                              que convencem o modelo a ignorar os freios. O
+                              modelo continua igual; muda só a entrada.
+
+  Prefill                     Você "começa" a resposta do assistente por ele,
+  (preencher a resposta)      e o modelo continua a partir dali, pulando a
+                              recusa.
+
+  OBS.: o Grupo 3 não "destrava" de verdade - só explora brechas. É frágil
+  (cada atualização do modelo tapa os buracos) e é o método mais associado a
+  uso abusivo.
+
+
+--------------------------------------------------------------------------------
+COMPARAÇÃO DAS PRINCIPAIS
+--------------------------------------------------------------------------------
+  TÉCNICA               PERMANENTE?   CUSTO        QUALIDADE DO RESULTADO
+  -------------------   -----------   ----------   ----------------------------
+  Abliteration          Sim           Baixo        Boa (pode degradar um pouco)
+  Fine-tune / Dolphin   Sim           Médio/Alto   Muito boa, mais "natural"
+  LoRA                  Sim (acopla)  Baixo        Boa, flexível
+  DPO                   Sim           Médio        Boa, controlada
+  Activation steering   Não (runtime) Muito baixo  Ajustável "no botão"
+  Merging               Sim           Baixo        Varia (mistura)
+  Jailbreak por prompt  Não           Zero         Instável / frágil
+
+
+--------------------------------------------------------------------------------
+QUAL É "A MELHOR"?
+--------------------------------------------------------------------------------
+  - Mais limpa e natural:        fine-tune (tipo Dolphin) ou DPO.
+  - Mais barata e rápida:        abliteration (por isso domina o Hugging Face).
+  - Mais flexível/reversível:    activation steering (liga/desliga sem regravar).
+  - Mais usada para blends:      model merging.
+
+
+--------------------------------------------------------------------------------
+NOTA
+--------------------------------------------------------------------------------
+Conteúdo educativo, no nível conceitual (conhecimento público de ML). As
+mesmas ressalvas legais do tutorial principal valem aqui: NSFW adulto/
+consentido geralmente é legal; vira crime com menores (inclusive IA), deepfake
+sem consentimento, pornografia de vingança e distribuição indevida. A linha de
+conteúdo com menores é absoluta.
+
+Ver também: tutorial-modelos-sem-censura.txt
+
+================================================================================
+  Fim.
+================================================================================
