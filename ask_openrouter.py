@@ -49,12 +49,15 @@ def load_key():
     )
 
 
-def ask(model, prompt, key, system=None):
+def ask(model, prompt, key, system=None, max_tokens=None):
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
-    body = json.dumps({"model": model, "messages": messages}).encode("utf-8")
+    payload = {"model": model, "messages": messages}
+    if max_tokens:
+        payload["max_tokens"] = max_tokens
+    body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         API_URL,
         data=body,
@@ -80,12 +83,13 @@ def main():
     ap.add_argument("prompt", help="a pergunta (use - para ler do stdin)")
     ap.add_argument("--model", default=DEFAULT_MODEL, help="ID do modelo")
     ap.add_argument("--system", default=None, help="mensagem de sistema (opcional)")
+    ap.add_argument("--max-tokens", type=int, default=None, help="limite de tokens da resposta")
     ap.add_argument("--json", action="store_true", help="imprime a resposta JSON crua")
     args = ap.parse_args()
 
     prompt = sys.stdin.read() if args.prompt == "-" else args.prompt
     key = load_key()
-    data = ask(args.model, prompt, key, args.system)
+    data = ask(args.model, prompt, key, args.system, args.max_tokens)
 
     if args.json:
         print(json.dumps(data, indent=2, ensure_ascii=False))
