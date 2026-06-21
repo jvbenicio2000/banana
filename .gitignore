@@ -1,2 +1,8 @@
 __pycache__/
 *.pyc
+
+# Segredos — NUNCA subir para o GitHub
+.env
+.openrouter_key
+*.key
+.secrets/
